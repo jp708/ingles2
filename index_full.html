@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Listening & Grammar Master 🎧✍️</title>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --primary: #38bdf8;
+            --secondary: #f43f5e;
+            --accent: #fbbf24;
+            --green: #10b981;
+            --red: #ef4444;
+            --text-light: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Fredoka', cursive, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            transition: background-color 0.4s ease;
+            overflow-x: hidden;
+        }
+
+        body.flash-red {
+            animation: redFlash 0.5s ease;
+        }
+
+        @keyframes redFlash {
+            0% { background-color: var(--bg-color); }
+            30% { background-color: #450a0a; }
+            100% { background-color: var(--bg-color); }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 680px;
+            background: var(--card-bg);
+            border-radius: 28px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            padding: 25px;
+            text-align: center;
+            position: relative;
+            border: 3px solid var(--border-color);
+        }
+
+        header {
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 2rem;
+            margin-bottom: 6px;
+            text-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        /* Scoreboard (Buenas / Malas) */
+        .scoreboard {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background: #0f172a;
+            padding: 12px 20px;
+            border-radius: 20px;
+            margin: 15px 0;
+            border: 2px solid var(--border-color);
+        }
+
+        .score-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .score-box.good { color: var(--green); }
+        .score-box.bad { color: var(--red); }
+
+        .score-badge-val {
+            background: rgba(255,255,255,0.1);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 1.3rem;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            background-color: #334155;
+            border-radius: 20px;
+            height: 14px;
+            margin: 10px 0 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--green));
+            width: 0%;
+            transition: width 0.4s ease-in-out;
+            border-radius: 20px;
+        }
+
+        /* Screen States */
+        .screen { display: none; }
+        .screen.active {
+            display: block;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Audio Button */
+        .audio-btn {
+            background: linear-gradient(135deg, #0284c7, #0369a1);
+            color: white;
+            border: none;
+            padding: 16px 28px;
+            font-size: 1.25rem;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(2, 132, 199, 0.4);
+            margin: 15px 0;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .audio-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(2, 132, 199, 0.6);
+        }
+
+        /* Multiple Choice Grid */
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+            margin-top: 15px;
+        }
+
+        .option-card {
+            background: #334155;
+            border: 2px solid #475569;
+            border-radius: 18px;
+            padding: 16px 12px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 85px;
+            user-select: none;
+        }
+
+        .option-card:hover {
+            border-color: var(--primary);
+            background: #1e293b;
+            transform: translateY(-3px);
+        }
+
+        .option-card.shake, .text-input-container.shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+            border-color: var(--red) !important;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-2px, 0, 0); }
+            20%, 80% { transform: translate3d(4px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+            40%, 60% { transform: translate3d(6px, 0, 0); }
+        }
+
+        .option-card.correct-anim {
+            background-color: #064e3b !important;
+            border-color: var(--green) !important;
+            transform: scale(1.04);
+        }
+
+        /* TEXT INPUT STRUCTURE SECTION (NUEVO MÓDULO) */
+        .text-input-container {
+            margin-top: 20px;
+            background: #0f172a;
+            padding: 20px;
+            border-radius: 20px;
+            border: 2px solid var(--border-color);
+        }
+
+        .structure-guide {
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--primary);
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            border: 1px dashed var(--primary);
+        }
+
+        .input-box {
+            width: 100%;
+            padding: 14px 18px;
+            font-size: 1.2rem;
+            border-radius: 16px;
+            border: 2px solid #475569;
+            background-color: #1e293b;
+            color: #ffffff;
+            outline: none;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 15px;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-box:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, var(--accent), #eab308);
+            color: #0f172a;
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(251, 191, 36, 0.4);
+            transition: all 0.2s ease;
+        }
+
+        .btn-submit:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(251, 191, 36, 0.6);
+        }
+
+        /* SVG Clock */
+        .clock-svg {
+            width: 95px;
+            height: 95px;
+            margin-bottom: 6px;
+        }
+
+        /* Feedback Toast */
+        .feedback-message {
+            min-height: 32px;
+            margin-top: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .feedback-message.try-again {
+            color: var(--secondary);
+            animation: bounce 0.4s ease;
+        }
+
+        .feedback-message.success { color: var(--green); }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        /* Start & Result Screens */
+        .btn-start, .btn-restart {
+            background: linear-gradient(135deg, var(--green), #059669);
+            color: white;
+            font-size: 1.35rem;
+            font-weight: bold;
+            padding: 16px 36px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+            transition: all 0.2s ease;
+            margin-top: 20px;
+        }
+
+        .btn-start:hover, .btn-restart:hover {
+            transform: scale(1.06);
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.6);
+        }
+
+        .trophy-icon {
+            font-size: 4rem;
+            margin: 15px 0;
+            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); }
+            100% { transform: scale(1); }
+        }
+
+        .category-tag {
+            display: inline-block;
+            background: #0284c7;
+            color: #ffffff;
+            padding: 4px 14px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .badge-hard {
+            background: var(--secondary);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            margin-left: 6px;
+        }
+
+        @media (max-width: 520px) {
+            .container { padding: 18px 12px; }
+            h1 { font-size: 1.5rem; }
+            .options-grid { grid-template-columns: 1fr; }
+            .option-card { padding: 14px 10px; font-size: 1.1rem; min-height: 70px; }
+            .audio-btn { padding: 12px 20px; font-size: 1.1rem; }
+            .scoreboard { padding: 8px 12px; font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- HEADER -->
+        <header>
+            <h1>Listening & Writing Master 🎧✍️ <span class="badge-hard">COMPLETO</span></h1>
+            <p class="subtitle">¡Escucha, selecciona y ESCRIBE las estructuras completas!</p>
+        </header>
+
+        <!-- SCOREBOARD -->
+        <div id="game-stats" style="display: none;">
+            <div class="scoreboard">
+                <div class="score-box good">
+                    <span>✅ Buenas:</span>
+                    <span class="score-badge-val" id="buenas-val">0</span>
+                </div>
+                <div class="score-box bad">
+                    <span>❌ Malas:</span>
+                    <span class="score-badge-val" id="malas-val">0</span>
+                </div>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+        </div>
+
+        <!-- SCREEN 1: START -->
+        <div id="start-screen" class="screen active">
+            <div style="font-size: 4.5rem; margin: 20px 0;">📝🎧</div>
+            <h2>Práctica Completa de Evaluación</h2>
+            <p style="margin: 15px 0; color: var(--text-muted); line-height: 1.6;">
+                Incluye selección de números, horas completas y **escritura de respuestas en la estructura correcta** (<em>Yes, he does / No, she doesn't</em>).
+            </p>
+            <button class="btn-start" onclick="startGame()">¡Comenzar Evaluación! 🚀</button>
+        </div>
+
+        <!-- SCREEN 2: QUESTION -->
+        <div id="question-screen" class="screen">
+            <span class="category-tag" id="category-tag">Categoría</span>
+            <div id="prompt-text" style="font-size: 1.1rem; margin-bottom: 10px; font-weight: 600;">Pulsa el botón para escuchar:</div>
+            
+            <button class="audio-btn" onclick="playAudio()">
+                🔊 Escuchar Audio
+            </button>
+
+            <!-- Mode A: Multiple Choice Options -->
+            <div class="options-grid" id="options-container"></div>
+
+            <!-- Mode B: Sentence Structure Typing Challenge -->
+            <div class="text-input-container" id="text-input-container" style="display: none;">
+                <div class="structure-guide" id="structure-guide">
+                    💡 Estructura: <strong>Yes, he/she does.</strong> o <strong>No, he/she doesn't.</strong>
+                </div>
+                <input type="text" id="user-sentence-input" class="input-box" placeholder="Escribe la respuesta completa aquí..." autocomplete="off">
+                <button class="btn-submit" onclick="submitWrittenAnswer()">Enviar Respuesta ✍️</button>
+            </div>
+
+            <div class="feedback-message" id="feedback"></div>
+        </div>
+
+        <!-- SCREEN 3: RESULTS -->
+        <div id="result-screen" class="screen">
+            <div class="trophy-icon">🏆</div>
+            <h2>¡Evaluación Finalizada! 🎉</h2>
+            <p style="font-size: 1.2rem; margin: 15px 0;">Completaste los módulos de escucha y escritura de estructuras.</p>
+            
+            <div class="scoreboard" style="max-width: 350px; margin: 20px auto;">
+                <div class="score-box good">
+                    <span>✅ Correctas:</span>
+                    <span class="score-badge-val" id="final-buenas">0</span>
+                </div>
+                <div class="score-box bad">
+                    <span>❌ Errores:</span>
+                    <span class="score-badge-val" id="final-malas">0</span>
+                </div>
+            </div>
+
+            <button class="btn-restart" onclick="startGame()">¡Repetir Práctica! 🔄</button>
+        </div>
+    </div>
+
+    <script>
+        // COMPREHENSIVE QUESTION BANK (Options + Writing Structure Challenges)
+        const questions = [
+            // PART 1: NUMBERS (10-100 & Teen vs Ty)
+            {
+                type: "choice",
+                category: "Numbers 10-100",
+                audioText: "Fourteen",
+                prompt: "¿Qué número escuchaste?",
+                options: [
+                    { text: "14", isCorrect: true },
+                    { text: "40", isCorrect: false },
+                    { text: "44", isCorrect: false },
+                    { text: "10", isCorrect: false }
+                ]
+            },
+            {
+                type: "choice",
+                category: "Numbers 10-100",
+                audioText: "Seventy",
+                prompt: "¿Qué número escuchaste?",
+                options: [
+                    { text: "17", isCorrect: false },
+                    { text: "70", isCorrect: true },
+                    { text: "77", isCorrect: false },
+                    { text: "71", isCorrect: false }
+                ]
+            },
+            {
+                type: "choice",
+                category: "Numbers 10-100",
+                audioText: "Ninety-nine",
+                prompt: "¿Qué número escuchaste?",
+                options: [
+                    { text: "99", isCorrect: true },
+                    { text: "19", isCorrect: false },
+                    { text: "90", isCorrect: false },
+                    { text: "39", isCorrect: false }
+                ]
+            },
+
+            // PART 2: TELLING THE TIME (O'clock, Half past, Quarter past, Quarter to)
+            {
+                type: "choice",
+                category: "Telling the Time",
+                audioText: "It is seven o'clock.",
+                prompt: "Escucha la hora exacta (o'clock):",
+                options: [
+                    { text: "7:00", clock: {h: 7, m: 0}, isCorrect: true },
+                    { text: "7:30", clock: {h: 7, m: 30}, isCorrect: false },
+                    { text: "12:07", clock: {h: 12, m: 7}, isCorrect: false },
+                    { text: "6:00", clock: {h: 6, m: 0}, isCorrect: false }
+                ]
+            },
+            {
+                type: "choice",
+                category: "Telling the Time",
+                audioText: "It is half past six.",
+                prompt: "Escucha la hora:",
+                options: [
+                    { text: "6:30", clock: {h: 6, m: 30}, isCorrect: true },
+                    { text: "6:15", clock: {h: 6, m: 15}, isCorrect: false },
+                    { text: "6:45", clock: {h: 6, m: 45}, isCorrect: false },
+                    { text: "6:00", clock: {h: 6, m: 0}, isCorrect: false }
+                ]
+            },
+            {
+                type: "choice",
+                category: "Telling the Time",
+                audioText: "It is quarter to nine.",
+                prompt: "Escucha la hora (quarter to):",
+                options: [
+                    { text: "8:45", clock: {h: 8, m: 45}, isCorrect: true },
+                    { text: "9:15", clock: {h: 9, m: 15}, isCorrect: false },
+                    { text: "9:45", clock: {h: 9, m: 45}, isCorrect: false },
+                    { text: "8:15", clock: {h: 8, m: 15}, isCorrect: false }
+                ]
+            },
+
+            // PART 3: WRITING STRUCTURE CHALLENGE (Escribir la oración exacta)
+            {
+                type: "write",
+                category: "Estructura: Does... like?",
+                audioText: "Does Tom like pizza? Yes, he does!",
+                prompt: "Escucha y ESCRIBE la respuesta afirmativa completa para Tom:",
+                structureGuide: "💡 Estructura esperada: Yes, he does.",
+                correctAnswers: ["yes, he does", "yes he does", "yes, he does."],
+            },
+            {
+                type: "write",
+                category: "Estructura: Does... like?",
+                audioText: "Does Anna like cats? No, she doesn't.",
+                prompt: "Escucha y ESCRIBE la respuesta negativa completa para Anna:",
+                structureGuide: "💡 Estructura esperada: No, she doesn't. (o No, she doesnt)",
+                correctAnswers: ["no, she doesn't", "no she doesnt", "no, she doesnt", "no, she doesn't."],
+            },
+            {
+                type: "write",
+                category: "Estructura: Does... like?",
+                audioText: "Does your teacher like apples? Yes, she does!",
+                prompt: "Escucha y ESCRIBE la respuesta completa para la profesora:",
+                structureGuide: "💡 Estructura esperada: Yes, she does.",
+                correctAnswers: ["yes, she does", "yes she does", "yes, she does."],
+            },
+            {
+                type: "write",
+                category: "Estructura: Does... like?",
+                audioText: "Does your brother like swimming? No, he doesn't.",
+                prompt: "Escucha y ESCRIBE la respuesta negativa completa para tu hermano:",
+                structureGuide: "💡 Estructura esperada: No, he doesn't.",
+                correctAnswers: ["no, he doesn't", "no he doesnt", "no, he doesnt", "no, he doesn't."],
+            }
+        ];
+
+        let currentIndex = 0;
+        let buenas = 0;
+        let malas = 0;
+        let isAnswerLocked = false;
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'success') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.3);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            } else if (type === 'error') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.35);
+                gain.gain.setValueAtTime(0.35, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.35);
+            }
+        }
+
+        function playAudio() {
+            window.speechSynthesis.cancel();
+            const q = questions[currentIndex];
+            const utterance = new SpeechSynthesisUtterance(q.audioText);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.88;
+            utterance.pitch = 1.05;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function startGame() {
+            currentIndex = 0;
+            buenas = 0;
+            malas = 0;
+            isAnswerLocked = false;
+            document.getElementById('start-screen').classList.remove('active');
+            document.getElementById('result-screen').classList.remove('active');
+            document.getElementById('question-screen').classList.add('active');
+            document.getElementById('game-stats').style.display = 'block';
+            updateStats();
+            loadQuestion();
+        }
+
+        function updateStats() {
+            document.getElementById('buenas-val').textContent = buenas;
+            document.getElementById('malas-val').textContent = malas;
+            const progress = (currentIndex / questions.length) * 100;
+            document.getElementById('progress-bar').style.width = progress + '%';
+        }
+
+        function loadQuestion() {
+            isAnswerLocked = false;
+            const q = questions[currentIndex];
+            
+            document.getElementById('category-tag').textContent = q.category;
+            document.getElementById('prompt-text').textContent = q.prompt;
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('feedback').className = 'feedback-message';
+
+            const optionsContainer = document.getElementById('options-container');
+            const textInputContainer = document.getElementById('text-input-container');
+
+            if (q.type === 'choice') {
+                optionsContainer.style.display = 'grid';
+                textInputContainer.style.display = 'none';
+                optionsContainer.innerHTML = '';
+
+                q.options.forEach((opt) => {
+                    const card = document.createElement('div');
+                    card.className = 'option-card';
+
+                    if (opt.clock) {
+                        const clockSvg = createSVGClock(opt.clock.h, opt.clock.m);
+                        card.appendChild(clockSvg);
+                    }
+
+                    const label = document.createElement('span');
+                    label.textContent = opt.text;
+                    card.appendChild(label);
+
+                    card.onclick = () => checkChoiceAnswer(opt, card);
+                    optionsContainer.appendChild(card);
+                });
+            } else if (q.type === 'write') {
+                optionsContainer.style.display = 'none';
+                textInputContainer.style.display = 'block';
+                document.getElementById('structure-guide').innerHTML = q.structureGuide;
+                const inputField = document.getElementById('user-sentence-input');
+                inputField.value = '';
+                inputField.focus();
+
+                // Allow Enter key to submit
+                inputField.onkeyup = function(e) {
+                    if (e.key === 'Enter') submitWrittenAnswer();
+                };
+            }
+
+            setTimeout(playAudio, 300);
+        }
+
+        function checkChoiceAnswer(selectedOpt, cardElement) {
+            if (isAnswerLocked) return;
+
+            if (selectedOpt.isCorrect) {
+                isAnswerLocked = true;
+                buenas++;
+                updateStats();
+                playSound('success');
+
+                cardElement.classList.add('correct-anim');
+                const fb = document.getElementById('feedback');
+                fb.textContent = '¡Excelente! Respuesta Correcta ✨';
+                fb.className = 'feedback-message success';
+
+                if (window.confetti) {
+                    confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
+                }
+
+                setTimeout(nextQuestion, 1300);
+            } else {
+                malas++;
+                updateStats();
+                playSound('error');
+                triggerErrorEffects(cardElement);
+            }
+        }
+
+        function submitWrittenAnswer() {
+            if (isAnswerLocked) return;
+            const q = questions[currentIndex];
+            const inputField = document.getElementById('user-sentence-input');
+            const userVal = inputField.value.trim().toLowerCase().replace(/['’]/g, "'");
+
+            const isCorrect = q.correctAnswers.some(ans => ans.replace(/['’]/g, "'") === userVal);
+
+            if (isCorrect) {
+                isAnswerLocked = true;
+                buenas++;
+                updateStats();
+                playSound('success');
+
+                const fb = document.getElementById('feedback');
+                fb.textContent = '¡Estructura Correcta! ¡Bien escrito! ✍️🎉';
+                fb.className = 'feedback-message success';
+
+                if (window.confetti) {
+                    confetti({ particleCount: 60, spread: 70, origin: { y: 0.7 } });
+                }
+
+                setTimeout(nextQuestion, 1400);
+            } else {
+                malas++;
+                updateStats();
+                playSound('error');
+                triggerErrorEffects(document.getElementById('text-input-container'));
+            }
+        }
+
+        function triggerErrorEffects(element) {
+            document.body.classList.add('flash-red');
+            setTimeout(() => document.body.classList.remove('flash-red'), 500);
+
+            element.classList.add('shake');
+            setTimeout(() => element.classList.remove('shake'), 600);
+
+            const fb = document.getElementById('feedback');
+            fb.textContent = 'Vuelve a intentarlo, ¡tú puedes! 💪 (Revisa la estructura)';
+            fb.className = 'feedback-message try-again';
+
+            setTimeout(playAudio, 600);
+        }
+
+        function nextQuestion() {
+            currentIndex++;
+            if (currentIndex < questions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('question-screen').classList.remove('active');
+            document.getElementById('result-screen').classList.add('active');
+            document.getElementById('game-stats').style.display = 'none';
+
+            document.getElementById('final-buenas').textContent = buenas;
+            document.getElementById('final-malas').textContent = malas;
+
+            if (window.confetti) {
+                confetti({ particleCount: 140, spread: 90, origin: { y: 0.6 } });
+            }
+        }
+
+        function createSVGClock(hours, minutes) {
+            const svgNS = "http://www.w3.org/2000/svg";
+            const svg = document.createElementNS(svgNS, "svg");
+            svg.setAttribute("viewBox", "0 0 100 100");
+            svg.setAttribute("class", "clock-svg");
+
+            const circle = document.createElementNS(svgNS, "circle");
+            circle.setAttribute("cx", "50"); circle.setAttribute("cy", "50");
+            circle.setAttribute("r", "45"); circle.setAttribute("fill", "#1e293b");
+            circle.setAttribute("stroke", "#38bdf8"); circle.setAttribute("stroke-width", "4");
+            svg.appendChild(circle);
+
+            const center = document.createElementNS(svgNS, "circle");
+            center.setAttribute("cx", "50"); center.setAttribute("cy", "50");
+            center.setAttribute("r", "3.5"); center.setAttribute("fill", "#38bdf8");
+            svg.appendChild(center);
+
+            const minuteAngle = minutes * 6;
+            const hourAngle = (hours % 12) * 30 + (minutes / 2);
+
+            const minHand = document.createElementNS(svgNS, "line");
+            minHand.setAttribute("x1", "50"); minHand.setAttribute("y1", "50");
+            minHand.setAttribute("x2", "50"); minHand.setAttribute("y2", "18");
+            minHand.setAttribute("stroke", "#f43f5e"); minHand.setAttribute("stroke-width", "3.5");
+            minHand.setAttribute("stroke-linecap", "round");
+            minHand.setAttribute("transform", `rotate(${minuteAngle} 50 50)`);
+            svg.appendChild(minHand);
+
+            const hrHand = document.createElementNS(svgNS, "line");
+            hrHand.setAttribute("x1", "50"); hrHand.setAttribute("y1", "50");
+            hrHand.setAttribute("x2", "50"); hrHand.setAttribute("y2", "28");
+            hrHand.setAttribute("stroke", "#f8fafc"); hrHand.setAttribute("stroke-width", "5");
+            hrHand.setAttribute("stroke-linecap", "round");
+            hrHand.setAttribute("transform", `rotate(${hourAngle} 50 50)`);
+            svg.appendChild(hrHand);
+
+            return svg;
+        }
+    </script>
+</body>
+</html>
